@@ -24,8 +24,15 @@ class Regions extends Doctrine_Record {
 		return $region[0]['name'];
 	}
 
-	public static function getRegion($id) {
+	public static function getRegion($id) 
+	{
 		$query = Doctrine_Query::create() -> select("*") -> from("Regions") -> where("id = '$id'");
+		$region = $query -> execute();
+		return $region[0];
+	}
+	public static function getRegionNational() 
+	{
+		$query = Doctrine_Query::create() -> select("*") -> from("Regions") ;
 		$region = $query -> execute();
 		return $region[0];
 	}

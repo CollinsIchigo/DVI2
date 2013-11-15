@@ -2,8 +2,10 @@
 if (!defined('BASEPATH'))
 	exit('No direct script access allowed');
 
-class email_Management extends MY_Controller {
-	function __construct() {
+class email_Management extends MY_Controller 
+{
+	function __construct() 
+	{
 		parent::__construct();
 		$this -> load -> library('pagination');
 		//LOADING HELPERS TO BECOME AVAILBALE IN ALL CONSTRUCTOR METHODS
@@ -11,18 +13,21 @@ class email_Management extends MY_Controller {
 
 	}
 
-	public function index() {
+	public function index() 
+	{
 		$this -> view_data();
 	}
 
-	public function add_new() {
-	$data['country'] = Country_code::getcountry();	
+	public function add_new() 
+	{
+		$data['country'] = Country_code::getcountry();	
 		$data['title'] = "Add New Email";
 		$data['module_view'] = "add_email_view";
 		$this -> base_params($data);
 	}
 
-	public function view_data() {
+	public function view_data() 
+	{
 		$div = $this -> session -> userdata('user_group');
 		//getting the session user group
 		$div2 = $this -> session -> userdata('district_province_id');
@@ -76,12 +81,14 @@ class email_Management extends MY_Controller {
 		$this -> base_params($data);
 	}
 
-	public function change_availability($code) {
+	public function change_availability($code) 
+	{
 		$data = Emails::setValidEmails($code);
 		redirect("email_management");
 	}
 
-	public function change_inavailability($code) {
+	public function change_inavailability($code) 
+	{
 		$data = Emails::setInvalidEmails($code);
 		redirect("email_management");
 	}

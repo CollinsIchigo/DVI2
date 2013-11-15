@@ -1,16 +1,20 @@
-<?php
+<?php ////////
 class Disbursement_Management extends MY_Controller {
-	function __construct() {
+	function __construct() 
+	{
 		parent::__construct();
 		$this -> load -> library('pagination');
 	}
 
-	public function index() {
+	public function index() 
+	{
 		$this -> view_disbursements();
 	}
 
-	public function new_disbursement($id = null) {
-		if ($id != null) {
+	public function new_disbursement($id = null) 
+	{
+		if ($id != null) 
+		{
 			$disbursement = Disbursements::getDisbursement($id);
 			$data['disbursement'] = $disbursement[0];
 			$data['edit'] = true;
@@ -139,8 +143,11 @@ class Disbursement_Management extends MY_Controller {
 		$this -> base_params($data);
 	}
 
-	public function view_disbursements($paged_vaccine = null, $date_from = null, $date_to = null, $offset = 0, $default_offset = 0) {
+	public function view_disbursements($paged_vaccine = null, $date_from = null, $date_to = null, $offset = 0, $default_offset = 0) 
+	{
+		//picks data from the session to determine what is meant to be displayed
 		$district_or_province = $this -> session -> userdata('district_province_id');
+		//input data from the search box/filter
 		$this -> load -> helper('to_excel');
 		$to = $this -> input -> post('to');
 		$from = $this -> input -> post('from');
@@ -148,6 +155,8 @@ class Disbursement_Management extends MY_Controller {
 		$order_by = $this -> input -> post('order_by');
 		$order = $this -> input -> post('order');
 		$per_page = $this -> input -> post('per_page');
+		
+		//sets default values to be used if user doesn't enter data
 
 		if ($to == false) {
 			$to = date("U", mktime(0, 0, 0, 1, 1, date("Y") + 1));
@@ -167,14 +176,19 @@ class Disbursement_Management extends MY_Controller {
 		}
 
 		//Check if the user has specified how many items he/she wants per page. If not, default to 10 items per page.
-		if ($per_page > 0) {
+		if ($per_page > 0) 
+		{
 			$this -> session -> set_userdata(array("from" => $from, "to" => $to, "per_page" => $per_page, "order_by" => $order_by, "order" => $order));
-		} else {
+		} 
+		else 
+		{
 			$temp = $this -> session -> userdata('per_page');
-			if ($temp == false) {
+			if ($temp == false) 
+			{
 				$this -> session -> set_userdata(array("from" => $from, "to" => $to, "per_page" => 10, "order_by" => "Unix_Timestamp(str_to_date(Date_Issued,'%m/%d/%Y'))", "order" => "DESC"));
+				
 			}
-
+	
 		}
 		$items_per_page = $this -> session -> userdata('per_page');
 		$order_by = $this -> session -> userdata('order_by');
@@ -182,11 +196,15 @@ class Disbursement_Management extends MY_Controller {
 
 		$region = 0;
 		$district = 0;
-		if ($store != null) {
+		//$store variable is used to store the store the currently displayed store
+		if ($store != null) 
+		{
 			$split_parts = explode("_", $store);
 			$type = $split_parts[0];
 			$id = $split_parts[1];
-			if ($type == "district") {
+			
+			if ($type == "district") 
+			{
 				$district = $id;
 				$this -> session -> set_userdata(array("region" => ""));
 				$this -> session -> set_userdata(array("district" => $district));
@@ -199,28 +217,36 @@ class Disbursement_Management extends MY_Controller {
 				$this -> session -> set_userdata(array("region" => ""));
 			}
 		}
+		//sets the current doistrict and region of the user based on the sesion data
 		$district = $this -> session -> userdata('district');
 		$region = $this -> session -> userdata('region');
 
 		$data['title'] = "Disbursement Management::Vaccine Stock Ledger For The Period Between " . date('d/m/Y', $from) . " to " . date('d/m/Y', $to);
 		$data['content_view'] = "view_ledger_view";
 		$data['vaccines'] = Vaccines::getAll_Minified();
+		//blank arrays
 		$return_array = array();
 		$balances = array();
 
 		//Retrieve the user identifier from the session
 		$identifier = $this -> session -> userdata('user_identifier');
 
-		if ($identifier == "national_officer") {//National Level
-
-			foreach ($data['vaccines'] as $vaccine) {
+		if ($identifier == "national_officer") 
+		{
+			//National Level
+			foreach ($data['vaccines'] as $vaccine) 
+			{
 				//skip the vaccine that is currently being browsed through
-				if ($vaccine -> id == $paged_vaccine) {
+				if ($vaccine -> id == $paged_vaccine) 
+				{
 					continue;
 				}
+				
 				$total_disbursements = Disbursements::getTotalNationalDisbursements($vaccine -> id, $from, $to, $district, $region);
 
-				if ($total_disbursements > $items_per_page) {
+				if ($total_disbursements > $items_per_page)
+				 {
+				 	
 					$config['base_url'] = base_url() . "disbursement_management/view_disbursements/" . $vaccine -> id . "/" . $from . "/" . $to;
 					$config['total_rows'] = $total_disbursements;
 					$config['per_page'] = $items_per_page;
@@ -229,16 +255,19 @@ class Disbursement_Management extends MY_Controller {
 					$this -> pagination -> initialize($config);
 					$data['pagination'][$vaccine -> id] = $this -> pagination -> create_links();
 				}
+				 
 				$balances[$vaccine -> id] = Disbursements::getNationalPeriodBalance($vaccine -> id, $from);
 				$return_array[$vaccine -> id] = Disbursements::getNationalDisbursements($vaccine -> id, $from, $to, $default_offset, $items_per_page, $district, $region, $order_by, $order, $balances[$vaccine -> id]);
 
 			}
 
-			if ($paged_vaccine != null) {
+			if ($paged_vaccine != null) 
+			{
 				$data['paged_vaccine'] = $paged_vaccine;
 				$total_disbursements = Disbursements::getTotalNationalDisbursements($paged_vaccine, $from, $to, $district, $region);
 
-				if ($total_disbursements > $items_per_page) {
+				if ($total_disbursements > $items_per_page) 
+				{
 					$config['base_url'] = base_url() . "disbursement_management/view_disbursements/" . $paged_vaccine . "/" . $from . "/" . $to;
 					$config['total_rows'] = $total_disbursements;
 					$config['per_page'] = $items_per_page;
@@ -247,18 +276,25 @@ class Disbursement_Management extends MY_Controller {
 					$this -> pagination -> initialize($config);
 					$data['pagination'][$paged_vaccine] = $this -> pagination -> create_links();
 				}
+				
 				$balances[$paged_vaccine] = Disbursements::getNationalPeriodBalance($paged_vaccine, $from);
 				$return_array[$paged_vaccine] = Disbursements::getNationalDisbursements($paged_vaccine, $from, $to, $offset, $items_per_page, $district, $region, $order_by, $order, $balances[$paged_vaccine]);
 
 			}
-		} else if ($identifier == "provincial_officer") {//Regional Store Level
-			foreach ($data['vaccines'] as $vaccine) {
-				if ($vaccine -> id == $paged_vaccine) {
+		} 
+		else if ($identifier == "provincial_officer") 
+		{
+			//Regional Store Level
+			foreach ($data['vaccines'] as $vaccine) 
+			{
+				if ($vaccine -> id == $paged_vaccine) 
+				{
 					continue;
 				}
 				$total_disbursements = Disbursements::getTotalRegionalDisbursements($district_or_province, $vaccine -> id, $from, $to, $district, $region);
 
-				if ($total_disbursements > $items_per_page) {
+				if ($total_disbursements > $items_per_page) 
+				{
 					$config['base_url'] = base_url() . "disbursement_management/view_disbursements/" . $vaccine -> id . "/" . $from . "/" . $to;
 					$config['total_rows'] = $total_disbursements;
 					$config['per_page'] = $items_per_page;
@@ -289,14 +325,20 @@ class Disbursement_Management extends MY_Controller {
 				$return_array[$paged_vaccine] = Disbursements::getRegionalDisbursements($district_or_province, $paged_vaccine, $from, $to, $offset, $items_per_page, $district, $region, $order_by, $order, $balances[$paged_vaccine]);
 
 			}
-		} else if ($identifier == "district_officer") {//District Store Level
-			foreach ($data['vaccines'] as $vaccine) {
-				if ($vaccine -> id == $paged_vaccine) {
+		} 
+		else if ($identifier == "district_officer") 
+		{
+			//District Store Level
+			foreach ($data['vaccines'] as $vaccine) 
+			{
+				if ($vaccine -> id == $paged_vaccine) 
+				{
 					continue;
 				}
 				$total_disbursements = Disbursements::getTotalDistrictDisbursements($district_or_province, $vaccine -> id, $from, $to, $district);
 
-				if ($total_disbursements > $items_per_page) {
+				if ($total_disbursements > $items_per_page) 
+				{
 					$config['base_url'] = base_url() . "disbursement_management/view_disbursements/" . $vaccine -> id . "/" . $from . "/" . $to;
 					$config['total_rows'] = $total_disbursements;
 					$config['per_page'] = $items_per_page;
@@ -310,11 +352,13 @@ class Disbursement_Management extends MY_Controller {
 
 			}
 
-			if ($paged_vaccine != null) {
+			if ($paged_vaccine != null) 
+			{
 				$data['paged_vaccine'] = $paged_vaccine;
 				$total_disbursements = Disbursements::getTotalDistrictDisbursements($district_or_province, $paged_vaccine, $from, $to, $district);
 
-				if ($total_disbursements > $items_per_page) {
+				if ($total_disbursements > $items_per_page) 
+				{
 					$config['base_url'] = base_url() . "disbursement_management/view_disbursements/" . $paged_vaccine . "/" . $from . "/" . $to;
 					$config['total_rows'] = $total_disbursements;
 					$config['per_page'] = $items_per_page;
@@ -510,18 +554,18 @@ class Disbursement_Management extends MY_Controller {
 		redirect("disbursement_management");
 	}
 
-	public function drill_down($type, $id) {
-
+	public function drill_down($type, $id) 
+	{
 		$to = $this -> input -> post('to');
 		$from = $this -> input -> post('from');
 
 		if ($to == false) {
-			$to = date("U", mktime(0, 0, 0, 1, 1, date("Y") + 1));
+			$to = date("U", mktime(0, 0, 0, 1, 1, 69));
 		} else if ($to == true) {
 			$to = strtotime($to);
 		}
 		if ($from == false) {
-			$from = date("U", mktime(0, 0, 0, 1, 1, date('Y')));
+			$from = date("U", mktime(0, 0, 0, 1, 1, 00));
 		} else if ($from == true) {
 			$from = strtotime($from);
 		}
@@ -538,24 +582,28 @@ class Disbursement_Management extends MY_Controller {
 		$balances = array();
 		$archive_date = date('U');
 		//Type 0 means we are drilling down to a region
-		if ($type == 0) {
+		if ($type == 0) 
+		{
 			$data['recipient'] = Regions::getRegionName($id);
 			$data['type'] = 0;
 			$data['store_id'] = $id;
-			foreach ($data['vaccines'] as $vaccine) {
+			
+			foreach ($data['vaccines'] as $vaccine) 
+			{
 				$return_array[$vaccine -> id] = Disbursements::getRegionalReceipts($id, $vaccine -> id, $from, $to);
 				$current_stock[$vaccine -> id] = Disbursements::getRegionalPeriodBalance($id, $vaccine -> id, $archive_date);
 			}
 			$population = Regional_Populations::getRegionalPopulation($id, $year);
 		}
 		//Type 1 means we are drilling down to a district
-		else if ($type == 1) {
+		else if ($type == 1) 
+		{
 			$data['recipient'] = Districts::getDistrictName($id);
 			$data['type'] = 1;
 			$data['store_id'] = $id;
-			foreach ($data['vaccines'] as $vaccine) {
+			foreach ($data['vaccines'] as $vaccine) 
+			{
 				$return_array[$vaccine -> id] = Disbursements::getDistrictReceipts($id, $vaccine -> id, $from, $to);
-				//$current_stock[$vaccine->id] = Disbursements::getDistrictStockAtHand($id,$vaccine->id);
 				$current_stock[$vaccine -> id] = Disbursements::getDistrictPeriodBalance($id, $vaccine -> id, $archive_date);
 
 			}
@@ -563,13 +611,16 @@ class Disbursement_Management extends MY_Controller {
 
 		}
 		//Type 2 means we are drilling down to the whole country
-		if ($type == 2) {
+		if ($type == 2) 
+		{
 			$data['recipient'] = "National Store";
 			$data['type'] = 2;
 			$data['store_id'] = "0";
-			foreach ($data['vaccines'] as $vaccine) {
-				$return_array[$vaccine -> id] = Disbursements::getNationalReceived($vaccine -> id, $from, $to);
-				$current_stock[$vaccine -> id] = Disbursements::getNationalPeriodBalance($vaccine -> id, $archive_date);
+			
+			foreach ($data['vaccines'] as $vaccine) 
+			{
+				$return_array[$vaccine -> id] = Disbursements::getNationalReceived($vaccine -> id);
+				$current_stock[$vaccine -> id] = Disbursements::getNationalPeriodBalance($vaccine -> id);
 			}
 			$population = Regional_Populations::getNationalPopulation($year);
 		}
@@ -588,14 +639,16 @@ class Disbursement_Management extends MY_Controller {
 		$this -> load -> view('template', $data);
 	}
 
-	private function base_params_min($data) {
+	private function base_params_min($data) 
+	{
 		$data['scripts'] = array("jquery-ui.js", "tab.js");
 		$data['styles'] = array("jquery-ui.css", "tab.css");
 		$data['link'] = "disbursement_management";
 		$this -> load -> view('template', $data);
 	}
 
-	private function base_params_min_graph($data) {
+	private function base_params_min_graph($data) 
+	{
 		$data['scripts'] = array("jquery-ui.js", "tab.js", "FusionCharts/FusionCharts.js");
 		$data['styles'] = array("jquery-ui.css", "tab.css");
 		$data['link'] = "disbursement_management";
@@ -695,7 +748,8 @@ class Disbursement_Management extends MY_Controller {
 		redirect("disbursement_management");
 	}
 
-	public function reset_filters() {
+	public function reset_filters() 
+	{
 		$this -> session -> set_userdata(array('per_page' => ''));
 		$this -> session -> set_userdata(array('order_by' => ''));
 		$this -> session -> set_userdata(array('order' => ''));

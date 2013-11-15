@@ -1,6 +1,8 @@
 <?php
-class Vaccines extends Doctrine_Record {
-	public function setTableDefinition() {
+class Vaccines extends Doctrine_Record 
+{
+	public function setTableDefinition() 
+	{
 		$this -> hasColumn('Name', 'varchar', 50);
 		$this -> hasColumn('Designation', 'int', 20);
 		$this -> hasColumn('Formulation', 'varchar', 2);
@@ -23,7 +25,8 @@ class Vaccines extends Doctrine_Record {
 		$this -> hasColumn('Dhis_Remaining', 'varchar', 20);
 	}
 
-	public function setUp() {
+	public function setUp() 
+	{
 		$this -> setTableName('vaccines');
 		$this -> hasOne('User as User', array('local' => 'Added_By', 'foreign' => 'id'));
 		$this -> hasOne('Fridge_Compartments as Compartment', array('local' => 'Fridge_Compartment', 'foreign' => 'id'));
@@ -42,7 +45,8 @@ class Vaccines extends Doctrine_Record {
 		return $vaccines[0] -> Total;
 	}
 
-	public static function getAll_Minified() {
+	public static function getAll_Minified() 
+	{
 		$query = Doctrine_Query::create() -> select("id,Name,Doses_Required,Wastage_Factor,Tray_Color") -> from("vaccines") -> where("Active = '1'") -> orderBy("Name asc");
 		$vaccines = $query -> execute();
 		return $vaccines;

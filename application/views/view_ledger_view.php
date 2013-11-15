@@ -3,45 +3,57 @@ var url = "";
 $(function() {
 	//Create Javascript Array for holding all autocomplete suggestions. They are not too many :-)
 	var autocomplete_elements = Array();
-
-//Loop through all the stores returned from the backend to generate your autocomplete suggestions
-autocomplete_elements[0] = {value: "All Stores", id: "national_0"}
-	<?php 
-	$current_level = "";
-			if(isset($districts)){
-			//Create PHP arrays to traverse all districts and provinces
-			
-			$counter = 1;
-			foreach($districts as $district){
-			if($district['id'] == $this->session->userdata("district")){
-				$current_level = $district['name'];
-			}
+	//Loop through all the stores returned from the backend to generate your autocomplete suggestions
+	autocomplete_elements[0] = {value: "All Stores", id: "national_0"}
+	<?php
+			$current_level = "";
+			if(isset($districts))
+			{
+				//Create PHP arrays to traverse all districts and provinces
+				$counter = 1;
+				foreach($districts as $district)
+				{
+					if($district['id'] == $this->session->userdata("district"))
+					{
+						$current_level = $district['name'];
+					}
+					
 			?>
 			autocomplete_elements[<?php echo $counter;?>] = {value: "<?php echo $district['name'];?>", id: "district_<?php echo $district['id'];?>"}
 			<?php 
 			$counter++;
+			
+				}
+				
 			}
+			
+			if(isset($regions))
+			{
+				foreach($regions as $region)
+				{
+					if($region['id'] == $this->session->userdata("region"))
+					{
+						$current_level = $region['name'];
+						
+					}
+					?>
+					autocomplete_elements[<?php echo $counter;?>] = {value: "<?php echo $region['name'];?>", id: "region_<?php echo $region['id'];?>"}
+					<?php 
+					$counter++;
+				}
 			}
-			if(isset($regions)){
-			foreach($regions as $region){
-			if($region['id'] == $this->session->userdata("region")){
-				$current_level = $region['name'];
-			}
-			?>
-			autocomplete_elements[<?php echo $counter;?>] = {value: "<?php echo $region['name'];?>", id: "region_<?php echo $region['id'];?>"}
-			<?php 
-			$counter++;
-			}
-			}
-			if($current_level == ""){
-			$current_level = "All Stores";
+			
+			if($current_level == "")
+			{
+				$current_level = "All Stores";
+				
 			}
 			
 	?>
 	//Finish creating Autocomplete array
 	//Create the jqueryui autocomplete object
 	$( "#store" ).autocomplete({
-	         	source: autocomplete_elements,
+		       	source: autocomplete_elements,
 	         	select: function(event, ui) {
      			 var selected_id = ui.item.id; 
      			$( "#selected_store_id" ).attr("value",selected_id);  
@@ -103,14 +115,16 @@ function delete_record(){
 }
 function cleanup(){
 }
+
 </script> 
 <style type="text/css">
-#current_filter{
-font-weight: bold;
-border:2px solid #DDD;
-padding:5px;
-font-size:12px;
-}
+	#current_filter
+	{
+		font-weight: bold;
+		border:2px solid #DDD;
+		padding:5px;
+		font-size:12px;
+	}
 </style>
 <div title="Confirm Delete!" id="confirm_delete" style="width: 300px; height: 150px; margin: 5px auto 5px auto;">
 Are you sure you want to delete this record?
@@ -121,64 +135,69 @@ Are you sure you want to delete this record?
 
 <div class="filter"> 
 <div id="current_filter">
-Currently Showing Records For: <?php echo $current_level;?> <a class="link" href = "<?php echo base_url()?>/disbursement_management/reset_filters">Reset Filters</a>
+Currently Showing Records For: <?php echo $current_level;?> <a class="link" href = "<?php echo base_url()?>disbursement_management/reset_filters">Reset Filters</a>
 </div>
 <fieldset>
-<legend>Filter Options</legend>
-<?php echo form_open('disbursement_management/view_disbursements');?>
-<label for="from"><b>Select Store: </b></label>
-<input type="text" id="store" name="store"/>
-<input type="hidden" name="selected_store_id" id="selected_store_id"/>
-
-<label for="from"><b>From</b></label>
-<input type="text" id="from" name="from"/>
-<label for="to"><b>to</b></label>
-<input type="text" id="to" name="to"/>
-</br>
-<label for="order_by"><b>Order By</b></label>
-<select name="order_by">
-<option <?php if($this->session->userdata('order_by') == "Date_Issued_Timestamp"){echo "selected";}?> value="Date_Issued_Timestamp">Date Issued</option>  
-</select>
-<label for="order"><b>Order</b></label>
-<select name="order">
-<option <?php if($this->session->userdata('order') == "DESC"){echo "selected";}?> value="DESC">Descending</option> 
-<option <?php if($this->session->userdata('order') == "ASC"){echo "selected";}?> value="ASC">Ascending</option>
-</select>
-<label for="per_page"><b>Records per Page</b></label>
-<select name="per_page">
-<option <?php if($this->session->userdata('per_page') == 10){echo "selected";}?> value="10">10</option> 
-<option <?php if($this->session->userdata('per_page') == 20){echo "selected";}?> value="20">20</option>
-<option <?php if($this->session->userdata('per_page') == 50){echo "selected";}?> value="50">50</option>
-<option <?php if($this->session->userdata('per_page') == 70){echo "selected";}?> value="70">70</option>
-<option <?php if($this->session->userdata('per_page') == 100){echo "selected";}?> value="100">100</option>
-</select>
-<input type="submit" class="button" name="submit" value="Filter Records"/>
-</form>
+	<legend>Filter Options</legend>
+	<!--Start of the form containing the search fields-->
+	<?php echo form_open('disbursement_management/view_disbursements');?>
+	<label for="from"><b>Select Store: </b></label>
+	<input type="text" id="store" name="store"/>
+	<input type="hidden" name="selected_store_id" id="selected_store_id"/>
+	
+	<label for="from"><b>From</b></label>
+	<input type="text" id="from" name="from"/>
+	
+	<label for="to"><b>to</b></label>
+	<input type="text" id="to" name="to"/>
+	</br>
+	
+	<label for="order_by"><b>Order By</b></label>
+	<select name="order_by">
+		<option <?php if($this->session->userdata('order_by') == "Date_Issued_Timestamp"){echo "selected";}?> value="Date_Issued_Timestamp">Date Issued</option>  
+	</select>
+	
+	<label for="order"><b>Order</b></label>
+	<select name="order">
+		<option <?php if($this->session->userdata('order') == "DESC"){echo "selected";}?> value="DESC">Descending</option> 
+		<option <?php if($this->session->userdata('order') == "ASC"){echo "selected";}?> value="ASC">Ascending</option>
+	</select>
+	
+	<label for="per_page"><b>Records per Page</b></label>
+	<select name="per_page">
+		<option <?php if($this->session->userdata('per_page') == 10){echo "selected";}?> value="10">10</option> 
+		<option <?php if($this->session->userdata('per_page') == 20){echo "selected";}?> value="20">20</option>
+		<option <?php if($this->session->userdata('per_page') == 50){echo "selected";}?> value="50">50</option>
+		<option <?php if($this->session->userdata('per_page') == 70){echo "selected";}?> value="70">70</option>
+		<option <?php if($this->session->userdata('per_page') == 100){echo "selected";}?> value="100">100</option>
+	</select>
+	
+	<input type="submit" class="button" name="submit" value="Filter Records"/>
+	</form>
 </fieldset>
-
 </div>
 
-
 <?php
-$this->load->view('vaccine_tabs'); 
-
-//This code checks if the user is browsing through the ledger pages of a particular vaccine. If they are, automatically take them to the tab for that vaccine!
-if(isset($paged_vaccine)){?>
-<script type="text/javascript">
-$(function() {
-$("#vaccine_<?php echo $paged_vaccine;?>").click();
-}); 
-</script>
-<?php }
-$archive_date = date('m')-1 ."/15/".date('Y');
-$archive_timestamp = strtotime($archive_date);
-		
-foreach($vaccines as $vaccine){
+	//The vaccine tabs displayed at the top
+	$this->load->view('vaccine_tabs'); 
+	//This code checks if the user is browsing through the ledger pages of a particular vaccine. If they are, automatically take them to the tab for that vaccine!
+	if(isset($paged_vaccine))
+	{
+	?>
+		<script type="text/javascript">
+		$(function() {
+		$("#vaccine_<?php echo $paged_vaccine;?>").click();
+		}); 
+		</script>
+<?php 
+	}
+	$archive_date = date('m')-1 ."/15/".date('Y');
+	$archive_timestamp = strtotime($archive_date);
+	
+	foreach($vaccines as $vaccine)
+	{
 ?>
-
 <div id="<?php echo $vaccine->id?>">
-
-
 
 <table border="0" class="data-table" id = "table_<?php echo $vaccine->id?>">
 <a href="#" class="link export_link" style="margin-left:20px" vaccine="<?php echo $vaccine->id;?>" vaccine_name="<?php echo $vaccine->Name;?>">Export as Excell Sheet</a>
@@ -202,20 +221,25 @@ foreach($vaccines as $vaccine){
 		<th>Lot/Batch No.</th>
 		<th>Expiry Date</th>
 	</tr>
-	 <tr><td>Balance From Previous Period</td><td colspan="10" style="font-weight:bold"><?php echo $balances[$vaccine->id]?></td></tr>
+	 <!--<tr><td>Balance From Previous Period</td><td colspan="10" style="font-weight:bold"><?php echo $balances[$vaccine->id]?></td></tr>-->
 	<?php
-	$vaccine_totals = $balances[$vaccine->id]; 
-	$vaccine_disbursements = $disbursements[$vaccine->id];
-	if(count($vaccine_disbursements) == 0){?>
-	<tr><td colspan="9">No Records Exist For This Vaccine</td></tr>
-	<?php }
-	else{
-
-	foreach($vaccine_disbursements as $disbursement){
-		$received = false;
-		$store_identity = "";
-		$date = $disbursement->Date_Issued;
-		$timestamp = strtotime($date);
+		$vaccine_totals = $balances[$vaccine->id]; 
+		$vaccine_disbursements = $disbursements[$vaccine->id];
+		
+		if(count($vaccine_disbursements) == 0)
+		{
+			?>
+			<tr><td colspan="9">No Records Exist For This Vaccine</td></tr>
+	<?php
+		}
+	else
+	{
+		foreach($vaccine_disbursements as $disbursement)
+		{
+			$received = false;
+			$store_identity = "";
+			$date = $disbursement->Date_Issued;
+			$timestamp = strtotime($date);
 	?>
 	<tr>
 
@@ -225,7 +249,9 @@ foreach($vaccines as $vaccine){
 		//retrieve user identifier
 		$identifier = $this->session->userdata('user_identifier');
 		$population = 0;
-		if($identifier == "national_officer"){
+		
+		if($identifier == "national_officer")
+		{
 			$store_identity = "N0"; 
 			if($disbursement->Issued_To_National == "0"){
 			$population = Regional_Populations::getNationalPopulation(date('Y'));

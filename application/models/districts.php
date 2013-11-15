@@ -57,7 +57,8 @@ class Districts extends Doctrine_Record {
 		return $districts;
 	}
 
-	public static function getDistrict($id) {
+	public static function getDistrict($id) 
+	{
 		$query = Doctrine_Query::create() -> select("*") -> from("Districts") -> where("ID = '$id'");
 		$district = $query -> execute();
 		return $district[0];

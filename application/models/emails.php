@@ -95,7 +95,8 @@ public static function getProvinceEmails($store) {
 	}
 
 	//sets valid to zero in db
-	public static function setInvalidEmails($code) {
+	public static function setInvalidEmails($code) 
+	{
 		$query = Doctrine_Query::create() -> update('emails') -> set('valid', '0') -> where('id ="' . $code . '"');
 		$emails = $query -> execute();
 		return $emails;
